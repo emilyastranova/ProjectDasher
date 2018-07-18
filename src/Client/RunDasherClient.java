@@ -16,129 +16,131 @@ import javax.swing.Timer;
 
 import com.esotericsoftware.kryonet.Client;
 
-public class RunDasherClient extends Applet implements ActionListener, MouseListener{
+public class RunDasherClient extends Applet implements ActionListener {
 
-	Timer loop = new Timer(10,this);
-	double speed = 100;
+	// main timer
+	Timer loop = new Timer(10, this);
+	// speed variable
+	double clientSpeed = 0;
+	// Thread for setting speed inside server
 	Thread updateSpeed;
+	// Mouse for controlling test UI
 	MouseInfo mouse;
-	
-	//Our client object.
-		static Client client;
-		//IP to connect to.
-		static String ip = "localhost";
-		//static String ip = "192.168.1.64";
-		
-		//Ports to connect on.
-		static int tcpPort = 25565, udpPort = 25565;
-		
-	
-	public void init() {
-		setSize(1080,720);
-		loop.start();
-		addMouseListener(this);
-		
-		updateSpeed = new Thread(){
-			public void run() {
-				while(true) {
-				speed = ClientFramework.getSpeedForGUI();
-				}
-			}
-		};
-		
-		System.out.println("Connecting to the server...");
-		//Create the client.
-		client = new Client();
-		
-		//Register the packet object.
-		client.getKryo().register(PacketMessage.class);
+	// Our client object.
+	static Client client;
+	// IP to connect to.
+	static String ip = "localhost";
+	// Ports to connect on.
+	static int tcpPort = 25565, udpPort = 25565;
+	//init graphics storage library for on screen display stuff
+	GraphicsLibrary gl = new GraphicsLibrary();
 
-		//Start the client
-		client.start();
-		//The client MUST be started before connecting can take place.
-		
-		//Connect to the server - wait 5000ms before failing.
+	public void init() {
+		//set window size
+		setSize(1080,720);
+		//start main timer
+		loop.start();
+		//start server
 		try {
-			client.connect(5000, ip, tcpPort, udpPort);
-		} catch (IOException e) {
+			startServer();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		//Add a listener
-		client.addListener(new ClientFramework());
 		
-		System.out.println("Connected! The client program is now waiting for a packet...\n");
+		//start sending speed to client
 		
+	}
+
+	private void startSpeedThread() {
+		// TODO Auto-generated method stub
+
+		updateSpeed = new Thread() {
+			public void run() {
+				while (true) {
+					if(client.isConnected())
+					clientSpeed = ClientFramework.getSpeedForGUI();
+				}
+			}
+		};
+
 		updateSpeed.start();
 	}
-	
-	public void paint(Graphics g) {
-		drawSpeedometer(g);
-	}
-	
-	public void drawSpeedometer(Graphics g) {
-		g.setColor(Color.RED);
-		g.fillRect(100, 100, 100, 500);
-		
-		g.setColor(Color.blue);
-		g.fillRect(100, 100+(100-(int)speed)*5, 100, 500-((100-(int)speed)*5));
-	}
-	
-	 public void update(Graphics g) {
-		    Graphics offgc;
-		    Image offscreen = null;
-		    Dimension d = size();
 
-		    // create the offscreen buffer and associated Graphics
-		    offscreen = createImage(d.width, d.height);
-		    offgc = offscreen.getGraphics();
-		    // clear the exposed area
-		    offgc.setColor(getBackground());
-		    offgc.fillRect(0, 0, d.width, d.height);
-		    offgc.setColor(getForeground());
-		    // do normal redraw
-		    paint(offgc);
-		    // transfer offscreen to window
-		    g.drawImage(offscreen, 0, 0, this);
-		    }
+	private void startServer() throws InterruptedException {
+		System.out.println("Connecting to the server...");
+		// Create the client.
+		client = new Client();
+
+		// Register the packet object.
+		client.getKryo().register(PacketMessage.class);
+
+		// Start the client
+		client.start();
+		// The client MUST be started before connecting can take place.
+
+		// Connect to the server - wait 5000ms before failing.
+		for (int x = 0; x < 1000000; x++) {
+			if (!client.isConnected()) {
+				try {
+					client.connect(5000, ip, tcpPort, udpPort);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				Thread.sleep(10);
+			}
+			else {
+				x = 1000000;
+				startSpeedThread();
+			}
+		
+		}
+
+		// Add a listener
+		client.addListener(new ClientFramework());
+
+		System.out.println("Connected! The client program is now waiting for a packet...\n");
+		
+	}
+
+	public void paint(Graphics g) {
+		gl.drawClientText(g);
+		gl.drawSpeedometer(g,clientSpeed);
+		gl.drawClientConnected(g,client.isConnected());
+	}
+
+
+	public void update(Graphics g) {
+		Graphics offgc;
+		Image offscreen = null;
+		Dimension d = size();
+
+		// create the offscreen buffer and associated Graphics
+		offscreen = createImage(d.width, d.height);
+		offgc = offscreen.getGraphics();
+		// clear the exposed area
+		offgc.setColor(getBackground());
+		offgc.fillRect(0, 0, d.width, d.height);
+		offgc.setColor(getForeground());
+		// do normal redraw
+		paint(offgc);
+		// transfer offscreen to window
+		g.drawImage(offscreen, 0, 0, this);
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-		if(e.getSource()==loop) {
+
+		if (e.getSource() == loop) {
 			repaint();
+			if(ClientFramework.client != null) {
+				client = ClientFramework.client;
+			}
+			clientSpeed = ClientFramework.getSpeedForGUI();
 		}
-		
-	}
-	
-	
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
 	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-	}
-	
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-	}
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }
