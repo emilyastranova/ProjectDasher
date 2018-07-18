@@ -12,6 +12,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.IOException;
 
+import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
 import com.esotericsoftware.kryonet.Client;
@@ -38,6 +39,11 @@ public class RunDasherClient extends Applet implements ActionListener {
 	public void init() {
 		//set window size
 		setSize(1080,720);
+		//get ip
+		ip = JOptionPane.showInputDialog("Input IP address");
+		if(ip.isEmpty()) {
+			ip = "localhost";
+		}
 		//start main timer
 		loop.start();
 		//start server
