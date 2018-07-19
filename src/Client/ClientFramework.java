@@ -3,6 +3,8 @@ package Client;
 import java.io.IOException;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
@@ -12,6 +14,11 @@ public class ClientFramework extends Listener {
 	// DEBUG MODE TOGGLE
 	boolean debugMode = true;
 
+	// speed variable
+	static double clientSpeed = 0;
+	static double clientSteering = 0;
+	// Thread for setting speed inside server
+	static Thread updateSpeed;
 	// Our client object.
 	static Client client;
 	// IP to connect to.
@@ -25,6 +32,10 @@ public class ClientFramework extends Listener {
 	static boolean messageReceived = false;
 
 	public static void main(String[] args) throws Exception {
+		ip = JOptionPane.showInputDialog("Input IP address");
+		if (ip.isEmpty()) {
+			ip = "localhost";
+		}
 		System.out.println("Connecting to the server...");
 		// Create the client.
 		client = new Client();
@@ -37,18 +48,18 @@ public class ClientFramework extends Listener {
 		// The client MUST be started before connecting can take place.
 
 		// Connect to the server - wait 5000ms before failing.
-		for (int x = 0; x < 10000; x++) {
+		for (int x = 0; x < 1000000; x++) {
 			if (!client.isConnected()) {
 				try {
 					client.connect(5000, ip, tcpPort, udpPort);
 				} catch (IOException ex) {
-					ex.printStackTrace();
 				}
 				Thread.sleep(10);
+			} else {
+				x = 1000000;
+				startSpeedThread();
 			}
-			else {
-				x = 10000;
-			}
+
 		}
 
 		// Add a listener
@@ -77,11 +88,11 @@ public class ClientFramework extends Listener {
 	public static double getSpeedForGUI() {
 		return tempSpeed;
 	}
-	
+
 	static double tempSteering = 0.0;
 
 	public static double getSteeringFromGUI() {
-		return tempSteering*100;
+		return tempSteering * 1;
 	}
 
 	// I'm only going to implement this method from Listener.class because I only
@@ -91,11 +102,12 @@ public class ClientFramework extends Listener {
 		if (p instanceof PacketMessage) {
 			// Cast it, so we can access the message within.
 			PacketMessage packet = (PacketMessage) p;
-			if (debugMode)
-				System.out.println("speed: " + packet.steeringPacket);
+			if (debugMode) {
+				System.out.println("speed: " + packet.speedPacket + " Steering: " + packet.steeringPacket);
+			}
 			tempSpeed = Double.parseDouble(packet.speedPacket);
-			if(!packet.steeringPacket.isEmpty())
-			tempSteering = Double.parseDouble(packet.steeringPacket);
+			if (!packet.steeringPacket.isEmpty())
+				tempSteering = Double.parseDouble(packet.steeringPacket);
 
 			// We have now received the message!
 			messageReceived = true;
@@ -126,8 +138,7 @@ public class ClientFramework extends Listener {
 								ex.printStackTrace();
 							}
 							Thread.sleep(10);
-						}
-						else {
+						} else {
 							x = 10000;
 						}
 					}
@@ -141,6 +152,27 @@ public class ClientFramework extends Listener {
 				}
 			}
 		}.start();
+	}
+
+	private static void startSpeedThread() {
+		// TODO Auto-generated method stub
+
+		updateSpeed = new Thread() {
+			public void run() {
+				while (true) {
+					if (client.isConnected())
+						clientSpeed = getSpeedForGUI();
+
+					if (ClientFramework.client != null) {
+						client = ClientFramework.client;
+					}
+					clientSpeed = ClientFramework.getSpeedForGUI();
+					clientSteering = ClientFramework.getSteeringFromGUI();
+				}
+			}
+		};
+
+		updateSpeed.start();
 	}
 
 }

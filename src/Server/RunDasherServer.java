@@ -100,7 +100,7 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 		updateSpeed = new Thread() {
 			public void run() {
 				while (true) {
-					ServerFramework.setSpeedFromGUI(Double.toString(speed));
+					ServerFramework.setSpeedFromGUI(Double.toString(speed/100));
 					ServerFramework.setSteeringFromGUI(Double.toString(steering));
 				}
 			}

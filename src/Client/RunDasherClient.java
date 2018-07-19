@@ -20,7 +20,7 @@ import com.esotericsoftware.kryonet.Client;
 public class RunDasherClient extends Frame implements ActionListener, WindowListener {
 
 	// main timer
-	Timer loop = new Timer(10, this);
+	Timer loop = new Timer(500, this);
 	// speed variable
 	double clientSpeed = 0;
 	double clientSteering = 0;
