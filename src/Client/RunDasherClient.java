@@ -23,6 +23,7 @@ public class RunDasherClient extends Frame implements ActionListener, WindowList
 	Timer loop = new Timer(10, this);
 	// speed variable
 	double clientSpeed = 0;
+	double clientSteering = 0;
 	// Thread for setting speed inside server
 	Thread updateSpeed;
 	// Mouse for controlling test UI
@@ -114,9 +115,10 @@ public class RunDasherClient extends Frame implements ActionListener, WindowList
 
 	public void paint(Graphics g) {
 		gl.drawClientText(g);
-		gl.drawSpeedometer(g, clientSpeed);
+		gl.drawSpeedometer(g, 10, 10, clientSpeed);
 		gl.drawClientConnected(g, client.isConnected());
 		gl.drawSpeed(g, (int)clientSpeed);
+		gl.drawSteering(g, (int)clientSteering);
 	}
 
 	public void update(Graphics g) {
@@ -146,6 +148,7 @@ public class RunDasherClient extends Frame implements ActionListener, WindowList
 				client = ClientFramework.client;
 			}
 			clientSpeed = ClientFramework.getSpeedForGUI();
+			clientSteering = ClientFramework.getSteeringFromGUI();
 		}
 
 	}

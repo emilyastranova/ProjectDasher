@@ -10,7 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 public class ClientFramework extends Listener {
 
 	// DEBUG MODE TOGGLE
-	boolean debugMode = false;
+	boolean debugMode = true;
 
 	// Our client object.
 	static Client client;
@@ -65,7 +65,7 @@ public class ClientFramework extends Listener {
 		PacketMessage send = new PacketMessage();
 
 		while (true) {
-			send.message = in.nextLine();
+			send.speedPacket = in.nextLine();
 			client.sendTCP(send);
 			Thread.sleep(1);
 		}
@@ -77,6 +77,12 @@ public class ClientFramework extends Listener {
 	public static double getSpeedForGUI() {
 		return tempSpeed;
 	}
+	
+	static double tempSteering = 0.0;
+
+	public static double getSteeringFromGUI() {
+		return tempSteering*100;
+	}
 
 	// I'm only going to implement this method from Listener.class because I only
 	// need to use this one.
@@ -86,8 +92,10 @@ public class ClientFramework extends Listener {
 			// Cast it, so we can access the message within.
 			PacketMessage packet = (PacketMessage) p;
 			if (debugMode)
-				System.out.println("speed: " + packet.message);
-			tempSpeed = Double.parseDouble(packet.message);
+				System.out.println("speed: " + packet.steeringPacket);
+			tempSpeed = Double.parseDouble(packet.speedPacket);
+			if(!packet.steeringPacket.isEmpty())
+			tempSteering = Double.parseDouble(packet.steeringPacket);
 
 			// We have now received the message!
 			messageReceived = true;
@@ -115,6 +123,7 @@ public class ClientFramework extends Listener {
 							try {
 								client.connect(5000, ip, tcpPort, udpPort);
 							} catch (IOException ex) {
+								ex.printStackTrace();
 							}
 							Thread.sleep(10);
 						}

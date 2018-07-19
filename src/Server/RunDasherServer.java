@@ -1,6 +1,5 @@
 package Server;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
@@ -15,9 +14,12 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
 
+import javax.swing.JProgressBar;
 import javax.swing.Timer;
 
 import com.esotericsoftware.kryonet.Server;
+import com.studiohartman.jamepad.ControllerManager;
+import com.studiohartman.jamepad.ControllerState;
 
 import Client.GraphicsLibrary;
 import Client.PacketMessage;
@@ -28,8 +30,10 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 	Timer loop = new Timer(1, this);
 	// speed variable
 	double speed = 0;
+	double steering = 0;
 	// Thread for setting speed inside server
 	Thread updateSpeed;
+	Thread controllerThread;
 	// Mouse for controlling test UI
 	MouseInfo mouse;
 	// Server object
@@ -40,7 +44,7 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 	GraphicsLibrary gl = new GraphicsLibrary();
 	// mouse boolean
 	boolean mouseIsHeld = false;
-
+	
 	public static void main(String[] args) {
 		RunDasherServer f = new RunDasherServer();
 	//	f.setSize(1080, 720);
@@ -63,6 +67,7 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 		startSpeedThread();
 		//add window listener
 		addWindowListener(this);
+		startControllerThread();
 	}
 
 	public void startServer() {
@@ -95,28 +100,48 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 		updateSpeed = new Thread() {
 			public void run() {
 				while (true) {
-					ServerFramework.setMessageFromGUI(Double.toString(speed));
+					ServerFramework.setSpeedFromGUI(Double.toString(speed));
+					ServerFramework.setSteeringFromGUI(Double.toString(steering));
 				}
 			}
 		};
 		updateSpeed.start();
 	}
+	
+	public void startControllerThread() {
+		controllerThread = new Thread() {
+			public void run() {
+				ControllerManager controllers = new ControllerManager();
+				controllers.initSDLGamepad();
+				//Print a message when the "A" button is pressed. Exit if the "B" button is pressed 
+				//or the controller disconnects.
+				ControllerState currState;
+				while(true) {
+				  currState = controllers.getState(0);
+				  
+				  if(!currState.isConnected || currState.b) {
+				    break;
+				  }
+				  if(currState.rightTrigger>0.05)
+				    speed = (currState.rightTrigger)*100;
+				  else
+					  speed = -currState.leftTrigger*100;
+				  
+				  steering = currState.rightStickX;
+				}
+			}
+			
+		};
+		controllerThread.start();
+	}
 
 	public void paint(Graphics g) {
-		gl.drawSpeedometer(g, speed);
+		gl.drawSpeedometer(g, 10, 10, speed);
 		gl.drawDashboardText(g);
 		gl.drawClientConnected(g, server.getConnections().length != 0);
 		gl.drawSpeed(g, (int)speed);
 	}
-
-	public void drawSpeedometer(Graphics g) {
-		g.setColor(Color.RED);
-		g.fillRect(100, 100, 100, 500);
-
-		g.setColor(Color.blue);
-		g.fillRect(100, 100 + (100 - (int) speed) * 5, 100, 500 - ((100 - (int) speed) * 5));
-	}
-
+	
 	public void update(Graphics g) {
 		Graphics offgc;
 		Image offscreen = null;
@@ -140,18 +165,6 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 
 		if (e.getSource() == loop) {
 			repaint();
-			if (speed > 0 && !mouseIsHeld) {
-				speed--;
-			}
-
-			if (speed < 50 && mouseIsHeld) {
-				speed += 2;
-				// System.out.println(speed);
-			}
-			if (speed >= 50 && speed < 100 && mouseIsHeld) {
-				speed += 0.25;
-				// System.out.println(speed);
-			}
 		}
 	}
 

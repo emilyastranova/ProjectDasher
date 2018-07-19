@@ -41,18 +41,27 @@ public class ServerFramework extends Listener {
 		server.addListener(new ServerFramework());
 
 		System.out.println("Server is operational!");
-		
 
 	}
-	
-	static String tempMessage ="";
-	
-	public static void setMessageFromGUI(String s) {
-		tempMessage = s;
+
+	static String tempSpeed = "";
+
+	public static void setSpeedFromGUI(String s) {
+		tempSpeed = s;
+	}
+
+	public String getSpeedFromGUI() {
+		return tempSpeed;
 	}
 	
-	public String getMessageFromGUI() {
-		return tempMessage;
+	static String tempSteering = "";
+
+	public static void setSteeringFromGUI(String steer) {
+		tempSteering = steer;
+	}
+
+	public String getSteeringFromGUI() {
+		return tempSteering;
 	}
 
 	// This is run when a connection is received!
@@ -61,27 +70,29 @@ public class ServerFramework extends Listener {
 		// Create a message packet.
 		PacketMessage packetMessage = new PacketMessage();
 		// Assign the message text.
-		packetMessage.message = "0";
+		packetMessage.speedPacket = "0";
+		packetMessage.steeringPacket = "0";
 		// Send the message
-		
+
 		c.sendTCP(packetMessage);
-		
+
 		(new Thread() {
-			  public void run() {
-			    // do stuff
-				  while(true) {
-					  packetMessage.message = getMessageFromGUI();
-					  if(!tempMessage.equals(""))
-				  c.sendTCP(packetMessage);
-				  try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			public void run() {
+				// do stuff
+				while (true) {
+					packetMessage.speedPacket = getSpeedFromGUI();
+					packetMessage.steeringPacket = getSteeringFromGUI();
+					if (!tempSpeed.equals(""))
+						c.sendTCP(packetMessage);
+					try {
+						Thread.sleep(1);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				  }
-			  }
-			 }).start();
+			}
+		}).start();
 		// Alternatively, we could do:
 		// c.sendUDP(packetMessage);
 		// To send over UDP.
@@ -96,7 +107,7 @@ public class ServerFramework extends Listener {
 		if (p instanceof PacketMessage) {
 			// Cast it, so we can access the message within.
 			PacketMessage packet = (PacketMessage) p;
-			System.out.println("Client: " + packet.message);
+			System.out.println("Client: " + packet.speedPacket);
 
 		}
 

@@ -6,20 +6,22 @@ import java.awt.Graphics;
 
 public class GraphicsLibrary {
 
-	public void drawSpeedometer(Graphics g, double speed) {
+	public void drawSpeedometer(Graphics g, int x, int y, double speed) {
 		g.setColor(Color.black);
 		g.drawRect(100, 100, 100, 500);
 
-		g.setColor(Color.GREEN);
-		g.fillRect(101, 101 + (100 - (int) speed) * 5, 99, 500 - ((100 - (int) speed) * 5) - 1);
-
-		if (speed > 50) {
-			g.setColor(Color.RED);
-			g.fillRect(101, 101 + (100 - (int) speed) * 5, 99, 500 - ((100 - (int) speed) * 5) - 250);
+		if (speed > 0) {
+			g.setColor(Color.GREEN);
+			g.fillRect(101, (int) (351 - (speed) * 2.5), 99, (int) ((speed) * 2.5));
 		}
 
+		if (speed < 0) {
+			g.setColor(Color.RED);
+			g.fillRect(101, (int)(350), 99 ,  (int)(0+(-speed*2.5)));
+		}
 		g.setColor(Color.black);
 		g.drawLine(100, 350, 200, 350);
+
 	}
 
 	public void drawDashboardText(Graphics g) {
@@ -49,15 +51,21 @@ public class GraphicsLibrary {
 			g.drawString("Disconnected", 405, 150);
 		}
 	}
-	
-	public void drawSpeed(Graphics g,int speed) {
+
+	public void drawSpeed(Graphics g, int speed) {
 		g.setFont(new Font("Arial", Font.BOLD, 40));
 		g.setColor(Color.BLACK);
-		if(speed<100)
-		g.drawString("Speed: " + speed, 70, 650);
+		if (speed < 100)
+			g.drawString("Speed: " + speed, 70, 650);
 		else
 			g.drawString("MAX POWAH", 70, 650);
-			
+
 	}
 
+	public void drawSteering(Graphics g, int steering) {
+		g.setFont(new Font("Arial", Font.BOLD, 40));
+		g.setColor(Color.BLACK);
+		g.drawString("Steering: " + steering, 500, 650);
+
+	}
 }
