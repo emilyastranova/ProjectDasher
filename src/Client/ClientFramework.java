@@ -10,7 +10,7 @@ import com.esotericsoftware.kryonet.Listener;
 public class ClientFramework extends Listener {
 
 	// DEBUG MODE TOGGLE
-	boolean debugMode = true;
+	boolean debugMode = false;
 
 	// Our client object.
 	static Client client;
@@ -115,7 +115,6 @@ public class ClientFramework extends Listener {
 							try {
 								client.connect(5000, ip, tcpPort, udpPort);
 							} catch (IOException ex) {
-								ex.printStackTrace();
 							}
 							Thread.sleep(10);
 						}

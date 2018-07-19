@@ -1,15 +1,15 @@
 package Client;
 
-import java.applet.Applet;
-import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 
 import javax.swing.JOptionPane;
@@ -17,7 +17,7 @@ import javax.swing.Timer;
 
 import com.esotericsoftware.kryonet.Client;
 
-public class RunDasherClient extends Applet implements ActionListener {
+public class RunDasherClient extends Frame implements ActionListener, WindowListener {
 
 	// main timer
 	Timer loop = new Timer(10, this);
@@ -33,30 +33,34 @@ public class RunDasherClient extends Applet implements ActionListener {
 	static String ip = "localhost";
 	// Ports to connect on.
 	static int tcpPort = 25565, udpPort = 25565;
-	//init graphics storage library for on screen display stuff
+	// init graphics storage library for on screen display stuff
 	GraphicsLibrary gl = new GraphicsLibrary();
 
-	public void init() {
-		//set window size
-		setSize(1080,720);
-		//get ip
+	public static void main(String[] args) {
+		RunDasherClient f = new RunDasherClient();
+		f.setSize(1080, 720);
+		f.setVisible(true);
+		f.setTitle("Project Dasher Client");
+		f.setLayout(new FlowLayout());
+	}
+
+	public RunDasherClient() {
+		// set window size
+		setSize(1080, 720);
+		// get ip
 		ip = JOptionPane.showInputDialog("Input IP address");
-		if(ip.isEmpty()) {
+		if (ip.isEmpty()) {
 			ip = "localhost";
 		}
-		//start main timer
+		// start main timer
 		loop.start();
-		//start server
+		// start server
 		try {
 			startServer();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-		
-		
-		//start sending speed to client
-		
+
+		addWindowListener(this);
 	}
 
 	private void startSpeedThread() {
@@ -65,8 +69,8 @@ public class RunDasherClient extends Applet implements ActionListener {
 		updateSpeed = new Thread() {
 			public void run() {
 				while (true) {
-					if(client.isConnected())
-					clientSpeed = ClientFramework.getSpeedForGUI();
+					if (client.isConnected())
+						clientSpeed = ClientFramework.getSpeedForGUI();
 				}
 			}
 		};
@@ -92,30 +96,28 @@ public class RunDasherClient extends Applet implements ActionListener {
 				try {
 					client.connect(5000, ip, tcpPort, udpPort);
 				} catch (IOException ex) {
-					ex.printStackTrace();
 				}
 				Thread.sleep(10);
-			}
-			else {
+			} else {
 				x = 1000000;
 				startSpeedThread();
 			}
-		
+
 		}
 
 		// Add a listener
 		client.addListener(new ClientFramework());
 
 		System.out.println("Connected! The client program is now waiting for a packet...\n");
-		
+
 	}
 
 	public void paint(Graphics g) {
 		gl.drawClientText(g);
-		gl.drawSpeedometer(g,clientSpeed);
-		gl.drawClientConnected(g,client.isConnected());
+		gl.drawSpeedometer(g, clientSpeed);
+		gl.drawClientConnected(g, client.isConnected());
+		gl.drawSpeed(g, (int)clientSpeed);
 	}
-
 
 	public void update(Graphics g) {
 		Graphics offgc;
@@ -140,7 +142,7 @@ public class RunDasherClient extends Applet implements ActionListener {
 
 		if (e.getSource() == loop) {
 			repaint();
-			if(ClientFramework.client != null) {
+			if (ClientFramework.client != null) {
 				client = ClientFramework.client;
 			}
 			clientSpeed = ClientFramework.getSpeedForGUI();
@@ -148,5 +150,47 @@ public class RunDasherClient extends Applet implements ActionListener {
 
 	}
 
+	@Override
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		dispose();
+		System.exit(0);
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+
+	}
 
 }
