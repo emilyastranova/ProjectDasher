@@ -6,6 +6,7 @@ import java.util.Scanner;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
+import com.fazecast.jSerialComm.SerialPort;
 
 import Client.PacketMessage;
 
@@ -13,6 +14,8 @@ public class ServerFramework extends Listener {
 
 	// Server object
 	static Server server;
+	
+	
 	// Ports to listen on
 	static int udpPort = 25565, tcpPort = 25565;
 
@@ -41,26 +44,44 @@ public class ServerFramework extends Listener {
 		server.addListener(new ServerFramework());
 
 		System.out.println("Server is operational!");
-
+		
 	}
 
 	static String tempSpeed = "";
 
 	public static void setSpeedFromGUI(String s) {
-		tempSpeed = s;
+		double tempX;
+		tempX = Double.parseDouble(s);
+		if(tempX > 0.0)
+		tempX = (tempX*35)+55;
+		else if(tempX == 0.0)
+			tempX = 50.0;
+		else if(tempX < 0.0)
+			tempX = (tempX*34)+49;
+		
+		tempSpeed = Double.toString(tempX);
 	}
 
-	public String getSpeedFromGUI() {
+	public static String getSpeedFromGUI() {
 		return tempSpeed;
 	}
 	
 	static String tempSteering = "";
 
 	public static void setSteeringFromGUI(String steer) {
-		tempSteering = steer;
+		double tempX;
+		tempX = Double.parseDouble(steer);
+		if(tempX > 0.0)
+		tempX = (tempX*40)+50;
+		else if(tempX == 0.0)
+			tempX = 50.0;
+		else if(tempX < 0.0)
+			tempX = (tempX*30)+45;
+		
+		tempSteering = Double.toString(tempX);
 	}
 
-	public String getSteeringFromGUI() {
+	public static String getSteeringFromGUI() {
 		return tempSteering;
 	}
 

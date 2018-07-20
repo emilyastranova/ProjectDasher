@@ -127,7 +127,7 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 				  else
 					  speed = -currState.leftTrigger*100;
 				  
-				  steering = currState.rightStickX;
+				  steering = currState.leftStickX;
 				}
 			}
 			
@@ -139,7 +139,8 @@ public class RunDasherServer extends Frame implements ActionListener, KeyListene
 		gl.drawSpeedometer(g, 10, 10, speed);
 		gl.drawDashboardText(g);
 		gl.drawClientConnected(g, server.getConnections().length != 0);
-		gl.drawSpeed(g, (int)speed);
+		gl.drawSpeed(g, (int)Double.parseDouble(ServerFramework.getSpeedFromGUI()));
+		gl.drawSteering(g, (int)(Double.parseDouble(ServerFramework.getSteeringFromGUI())));
 	}
 	
 	public void update(Graphics g) {

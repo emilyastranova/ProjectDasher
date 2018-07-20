@@ -4,5 +4,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="src/kryonet-2.21-all.jar"/>
 	<classpathentry kind="lib" path="src/Jamepad.jar"/>
+	<classpathentry kind="lib" path="junit.jar"/>
+	<classpathentry kind="lib" path="pi4j-core.jar"/>
+	<classpathentry kind="lib" path="pi4j-device.jar"/>
+	<classpathentry kind="lib" path="pi4j-example.jar"/>
+	<classpathentry kind="lib" path="pi4j-gpio-extension.jar"/>
+	<classpathentry kind="lib" path="pi4j-service.jar"/>
+	<classpathentry kind="lib" path="jSerialComm-2.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
