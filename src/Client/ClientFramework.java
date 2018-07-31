@@ -35,7 +35,7 @@ public class ClientFramework extends Listener {
 	// Our client object.
 	static Client client;
 	// IP to connect to.
-	static String ip = "107.131.154.241";
+	static String ip = "localhost";
 	// Ports to connect on.
 	static int tcpPort = 25565, udpPort = 25565;
 	
